@@ -46,7 +46,8 @@ function searchMovie() {
 
     let $moiveList = document.querySelectorAll('.movie-card');
     let moives = Array.from($moiveList).filter((parent)=>{
-        return parent.querySelector('.moive-title').innerHTML.includes($search_input.value);
+        // 대소문자 관계없이 검색 가능햐게 .toLowerCase() 사용
+        return parent.querySelector('.moive-title').innerHTML.toLowerCase().includes($search_input.value.toLowerCase());
     })
     let $cardList = document.querySelector('.card-list');
     $cardList.innerHTML = ""; // 자식 노드 모두 비우기
@@ -59,7 +60,7 @@ function searchMovie() {
 }
 
 // 영화 API 가져오기
-fetch('https://api.themoviedb.org/3/movie/top_rated?language=ko-kr&page=1', options)
+fetch('https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=1', options)
     .then(response => response.json())
     .then(response => {
         //console.log(response)
