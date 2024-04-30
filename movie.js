@@ -9,8 +9,6 @@ const options = {
 
 // 카드 만드는 함수
 function createCard(id, poster_path, title, overview, vote_average) {
-    //let $cardList = document.getElementsByClassName('card-list');
-    //console.log($cardList);
     let $cardDiv = document.createElement('div');
     $cardDiv.classList.add('movie-card');
     $cardDiv.id = id;
@@ -28,54 +26,45 @@ function createCard(id, poster_path, title, overview, vote_average) {
     })
 }
 
-// 영화 검색하는 함수
-function searchMovie() {
-    $search_input = document.querySelector('#search-input');
-    //// 영화 검색 API
-    // fetch(`https://api.themoviedb.org/3/search/movie?query=${$search_input.value}&include_adult=false&language=ko-KR&page=1`, options)
-    //     .then(response => response.json())
-    //     .then(response => {
-    //         let movies = response.results;
-    //         let $cardList = document.querySelector('.card-list');
-    //         $cardList.innerHTML = ""; // 자식 노드 모두 비우기
-    //         movies.forEach(movie => {
-    //             createCard(movie.id, movie.poster_path, movie.title, movie.overview, movie.vote_average);
-    //         });
-    //     })
-    //     .catch(err => console.error(err));
-
-    let $moiveList = document.querySelectorAll('.movie-card');
-    let moives = Array.from($moiveList).filter((parent)=>{
-        // 대소문자 관계없이 검색 가능햐게 .toLowerCase() 사용
-        return parent.querySelector('.moive-title').innerHTML.toLowerCase().includes($search_input.value.toLowerCase());
+// 카드 검색하는 함수
+function searchMovie(moiveList) {
+    const $search_input = document.querySelector('#search-input');
+    // 검색한 결과 카드 반환
+    const moives = moiveList.filter((moive)=>{
+        return moive.title.toLowerCase().includes($search_input.value.toLowerCase());
     })
-    let $cardList = document.querySelector('.card-list');
-    $cardList.innerHTML = ""; // 자식 노드 모두 비우기
-    
-    // 검색 결과만 화면에 표시
-    Array.from(moives).forEach((x)=>{
-        $cardList.append(x);
+    document.querySelector('.card-list').innerHTML = ""; // 카드 공간 비우기
+    // 검색한 영화 카드 만들기
+    moives.forEach((movie)=>{
+        createCard(movie.id, movie.poster_path, movie.title, movie.overview, movie.vote_average);
     })
-    
 }
 
-// 영화 API 가져오기
-fetch('https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=1', options)
-    .then(response => response.json())
-    .then(response => {
-        //console.log(response)
-        let movies = response.results;
-        let $cardList = document.querySelector('.card-list');
-        movies.forEach(movie => {
-            createCard(movie.id, movie.poster_path, movie.title, movie.overview, movie.vote_average);
-        });
+// 영화 가져오기 API
+async function getMoiveList() {
+    const response = await fetch('https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=1', options)
+        .then(response => response.json())
+        .catch(err => console.error(err));
+    return response.results;
+}
 
-    }).catch(err => console.error(err));
+// 영화 만들기
+async function movie() {
+    const moiveList = await getMoiveList();
+    // 카드 만들기
+    moiveList.forEach((movie)=>{
+        createCard(movie.id, movie.poster_path, movie.title, movie.overview, movie.vote_average);
+    })
+}
+
+// 함수 실행
+movie();
 
 // 검색 버튼 클릭 이벤트
-function handleSearch(event) {
+async function handleSearch(event) {
     event.preventDefault(); // 새로고침 방지
-    searchMovie();
+    const moiveList = await getMoiveList();
+    searchMovie(moiveList);
 }
 
 // 키보드 커서 자동 위치
